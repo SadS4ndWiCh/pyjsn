@@ -1,4 +1,4 @@
-from src.tokens import Tokens, Token
+from src.tokens import Tokens, Token, lookupIdent
 
 class Lexer:
 	tokens = {
@@ -65,12 +65,6 @@ class Lexer:
 		
 		return digit
 	
-	def _lookupIdent(self, ident):
-		if ident in keywords:
-			return keywords[ident]
-		
-		return ident
-	
 	def _eatWhitespace(self):
 		while self.ch in [" ", "\n", "\t", "\r"]:
 			self._readChar()
@@ -97,7 +91,7 @@ class Lexer:
 		elif ( not ch is None ) and self._isText(self.ch):
 			ident = self._getIdent()
 			
-			tok = Token(self._lookupIdent(ident), ident)
+			tok = Token(lookupIdent(ident), ident)
 			return tok
 			
 		elif ch is None:

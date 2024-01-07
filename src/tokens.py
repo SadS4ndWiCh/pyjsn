@@ -23,6 +23,14 @@ keywords = {
 	"false": Tokens.FALSE
 }
 
+
+def lookupIdent(ident):
+        if ident in keywords:
+                return keywords[ident]
+        
+        return ident
+
+
 @dataclass
 class Token:
 	type: Tokens
