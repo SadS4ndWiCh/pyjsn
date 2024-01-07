@@ -4,7 +4,8 @@ class Lexer:
 	tokens = {
 		"{": Token(Tokens.OPBRACE, "{"),
 		"}": Token(Tokens.CLBRACE, "}"),
-		":": Token(Tokens.COLON, ":")
+		":": Token(Tokens.COLON, ":"),
+		",": Token(Tokens.COMMA, ",")
 	}
 	
 	def __init__(self, input):
