@@ -31,7 +31,7 @@ class Lexer:
         return ch != '"' and ch != "\n"
 
     def _isIdent(self, ch):
-        return ch in "abcdefghijklmniopqrstuvwxyz0123456789"
+        return ch in "abcdefghijklmniopqrstuvwxyz"
 
     def _isDigit(self, ch):
         return ch in "0123456789."
@@ -91,7 +91,7 @@ class Lexer:
             tok = Token(Tokens.NUMBER, digit)
             return tok
 
-        elif ( not ch is None ) and self._isText(self.ch):
+        elif ( not ch is None ) and self._isIdent(self.ch):
             ident = self._getIdent()
 
             tok = Token(lookupIdent(ident), ident)
