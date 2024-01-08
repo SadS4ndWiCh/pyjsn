@@ -5,7 +5,7 @@ from src.lexer import Lexer
 
 class LexerTesting(unittest.TestCase):
     def test_tokenization(self):
-        json = '{"foo":"bar", "num": 12, "bool": false, "obj": { "inner": "obj" }}'
+        json = '{"foo":"bar", "num": 12, "bool": false, "obj": { "inner": "obj" }, "arr": ["first", 12, true]}'
 
         tokens = [
                 (Tokens.OPBRACE, "{"),
@@ -28,6 +28,16 @@ class LexerTesting(unittest.TestCase):
                 (Tokens.COLON, ":"),
                 (Tokens.STRING, "obj"),
                 (Tokens.CLBRACE, "}"),
+                (Tokens.COMMA, ","),
+                (Tokens.STRING, "arr"),
+                (Tokens.COLON, ":"),
+                (Tokens.OPBRACKET, "["),
+                (Tokens.STRING, "first"),
+                (Tokens.COMMA, ","),
+                (Tokens.NUMBER, "12"),
+                (Tokens.COMMA, ","),
+                (Tokens.TRUE, "true"),
+                (Tokens.CLBRACKET, "]"),
                 (Tokens.CLBRACE, "}"),
                 (Tokens.EOF, "")
         ]
@@ -39,4 +49,3 @@ class LexerTesting(unittest.TestCase):
 
             self.assertEqual(expectedType, tok.type)
             self.assertEqual(expectedLiteral, tok.literal)
-
