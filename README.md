@@ -6,7 +6,7 @@ A simple JSON parser written in Python.
 
 This is to help me learn more about the tokenization and parsing processes. So, I implement a simple JSON parser in Python because it is a more simple language.
 
-## 🛝 Exxample
+## 🛝 Example
 
 ```py
 import src.lexer import Lexer
