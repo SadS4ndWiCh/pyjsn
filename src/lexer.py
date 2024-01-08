@@ -4,6 +4,8 @@ class Lexer:
 	tokens = {
 		"{": Token(Tokens.OPBRACE, "{"),
 		"}": Token(Tokens.CLBRACE, "}"),
+		"[": Token(Tokens.OPBRACKET, "["),
+		"]": Token(Tokens.CLBRACKET, "]"),
 		":": Token(Tokens.COLON, ":"),
 		",": Token(Tokens.COMMA, ",")
 	}
