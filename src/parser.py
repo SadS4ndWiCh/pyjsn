@@ -1,84 +1,100 @@
 from src.tokens import Tokens
 
+
 class Parser:
     def __init__(self, lex):
         self.lex = lex
         self.errors = []
 
-        self.currToken = None
-        self.peekToken = None
+        self.curr_token = None
+        self.peek_token = None
 
-        self._nextToken()
-        self._nextToken()
+        self.__next_token()
+        self.__next_token()
 
-    def _addError(self, error):
+    def __add_error(self, error):
         self.errors.append(error)
 
-    def _currTokenIs(self, tk): return self.currToken.type == tk
-    def _peekTokenIs(self, tk): return self.peekToken.type == tk
-    def _expectPeek(self, tk):
-        if self._peekTokenIs(tk):
-            self._nextToken()
+    def __curr_token_is(self, tk):
+        return self.curr_token.type == tk
+
+    def __peek_token_is(self, tk):
+        return self.peek_token.type == tk
+
+    def __expect_peek(self, tk):
+        if self.__peek_token_is(tk):
+            self.__next_token()
             return True
 
-        self._addError(f"Expect {tk}, got={self.peekToken.type}")
+        self.__add_error(f"Expect {tk}, got={self.peek_token.type}")
         return False
 
-    def _nextToken(self):
-        self.currToken = self.peekToken
-        self.peekToken = self.lex.nextToken()
+    def __next_token(self):
+        self.curr_token = self.peek_token
+        self.peek_token = self.lex.next_token()
 
-    def _parseObject(self):
+    def __parse_object(self):
         obj = {}
 
-        while not self._currTokenIs(Tokens.CLBRACE) and not self._currTokenIs(Tokens.EOF):
-            if not self._expectPeek(Tokens.STRING): return None
+        while not self.__curr_token_is(Tokens.CLBRACE) and not self.__curr_token_is(
+            Tokens.EOF
+        ):
+            if not self.__expect_peek(Tokens.STRING):
+                return None
 
-            key = self.currToken.literal
+            key = self.curr_token.literal
 
-            if not self._expectPeek(Tokens.COLON): return None
+            if not self.__expect_peek(Tokens.COLON):
+                return None
 
-            self._nextToken()
+            self.__next_token()
 
-            obj[key] = self._parse()
+            obj[key] = self.__parse()
 
-            self._nextToken()
+            self.__next_token()
 
         return obj
 
-    def _parseArray(self):
+    def __parse_array(self):
         arr = []
 
-        self._nextToken()
+        self.__next_token()
 
-        while not self._currTokenIs(Tokens.CLBRACKET) and not self._currTokenIs(Tokens.EOF):
-            if self._currTokenIs(Tokens.COMMA) and self._peekTokenIs(Tokens.CLBRACKET):
-                self._addError(f"Expected value, got=CLBRACKET")
+        while not self.__curr_token_is(Tokens.CLBRACKET) and not self.__curr_token_is(
+            Tokens.EOF
+        ):
+            if self.__curr_token_is(Tokens.COMMA) and self.__peek_token_is(
+                Tokens.CLBRACKET
+            ):
+                self.__add_error("Expected value, got=CLBRACKET")
                 return None
 
-            elif self._currTokenIs(Tokens.COMMA):
-                self._nextToken()
+            elif self.__curr_token_is(Tokens.COMMA):
+                self.__next_token()
                 continue
 
-            element = self._parse()
+            element = self.__parse()
             arr.append(element)
 
-            self._nextToken()
+            self.__next_token()
 
         return arr
 
-    def _parse(self):
-        tok = self.currToken
+    def __parse(self):
+        tok = self.curr_token
 
-        if self._currTokenIs(Tokens.TRUE): return True
-        elif self._currTokenIs(Tokens.FALSE): return False
-        elif self._currTokenIs(Tokens.STRING): return tok.literal
-        elif self._currTokenIs(Tokens.OPBRACE):
-            return self._parseObject()
-        elif self._currTokenIs(Tokens.OPBRACKET):
-            return self._parseArray()
-        elif self._currTokenIs(Tokens.NUMBER): return float(tok.literal)
+        if self.__curr_token_is(Tokens.TRUE):
+            return True
+        elif self.__curr_token_is(Tokens.FALSE):
+            return False
+        elif self.__curr_token_is(Tokens.STRING):
+            return tok.literal
+        elif self.__curr_token_is(Tokens.OPBRACE):
+            return self.__parse_object()
+        elif self.__curr_token_is(Tokens.OPBRACKET):
+            return self.__parse_array()
+        elif self.__curr_token_is(Tokens.NUMBER):
+            return float(tok.literal)
 
     def parse(self):
-        return self._parse()
-
+        return self.__parse()
