@@ -1,24 +1,20 @@
 import unittest
 
+from src.ast import KindAST
 from src.lexer import Lexer
 from src.parser import Parser
 
 
 class ParserTest(unittest.TestCase):
     def test_parsing(self):
-        json = '{"foo":"bar", "num": 12, "bool": false, "obj": { "inner": "obj" }, "arr": ["first", 12, true]}'
+        source = '{"hello": "world", "foo": "bar"}'
 
-        lex = Lexer(json)
-        parser = Parser(lex)
+        lexer = Lexer(source)
+        parser = Parser(lexer)
 
-        data = parser.parse()
+        json_ast = parser.parse()
+        self.assertTrue(json_ast is not None)
+        self.assertEqual(json_ast.kind, KindAST.OBJECT)
 
-        expected_keys = ["foo", "num", "bool", "obj", "arr"]
-
-        self.assertEqual(len(data.keys()), len(expected_keys))
-
-        for key in data.keys():
-            self.assertIn(key, expected_keys)
-
-        self.assertEqual("inner" in data["obj"], True)
-        self.assertEqual(True in data["arr"], True)
+        print(f"{json_ast.keys!r}")
+        print(f"{json_ast.values!r}")

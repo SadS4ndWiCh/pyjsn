@@ -1,6 +1,6 @@
 import unittest
 
-from pyjsn.lexer import Kind, Lexer
+from src.lexer import Kind, Lexer
 
 
 class LexerTesting(unittest.TestCase):

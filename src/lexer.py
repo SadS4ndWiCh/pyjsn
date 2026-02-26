@@ -1,4 +1,4 @@
-from pyjsn.token import Kind, Token
+from src.token import Kind, Token
 
 
 class Lexer:
