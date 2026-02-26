@@ -1,52 +1,80 @@
 import unittest
 
-from src.tokens import Tokens
-from src.lexer import Lexer
+from pyjsn.lexer import Kind, Lexer
 
 
 class LexerTesting(unittest.TestCase):
-    def test_tokenization(self):
-        json = '{"foo":"bar", "num": 12, "bool": false, "obj": { "inner": "obj" }, "arr": ["first", 12, true]}'
+    def test_read_chars(self):
+        source = "{}"
 
+        lexer = Lexer(source)
+        self.assertEqual(lexer.read_char(), "{")
+        self.assertEqual(lexer.read_char(), "}")
+
+    def test_eat_space(self):
+        source = "    }      {"
+
+        lexer = Lexer(source)
+        lexer.eat_space()
+        self.assertEqual(lexer.read_char(), "}")
+
+        lexer.eat_space()
+        self.assertEqual(lexer.read_char(), "{")
+
+    def test_read_number(self):
+        source = "12.25."
+
+        lexer = Lexer(source)
+        token = lexer.next_token()
+
+        self.assertEqual(token.kind, Kind.NUMBER)
+        self.assertEqual(token.literal, "12.25")
+
+        token = lexer.next_token()
+        self.assertEqual(token.kind, Kind.UNKNOWN)
+        self.assertEqual(token.literal, ".")
+
+    def test_read_ident(self):
+        source = "true false"
+
+        lexer = Lexer(source)
+
+        token = lexer.next_token()
+        self.assertEqual(token.kind, Kind.TRUE)
+        self.assertEqual(token.literal, "true")
+
+        token = lexer.next_token()
+        self.assertEqual(token.kind, Kind.FALSE)
+        self.assertEqual(token.literal, "false")
+
+    def test_next_token(self):
         tokens = [
-            (Tokens.OPBRACE, "{"),
-            (Tokens.STRING, "foo"),
-            (Tokens.COLON, ":"),
-            (Tokens.STRING, "bar"),
-            (Tokens.COMMA, ","),
-            (Tokens.STRING, "num"),
-            (Tokens.COLON, ":"),
-            (Tokens.NUMBER, "12"),
-            (Tokens.COMMA, ","),
-            (Tokens.STRING, "bool"),
-            (Tokens.COLON, ":"),
-            (Tokens.FALSE, "false"),
-            (Tokens.COMMA, ","),
-            (Tokens.STRING, "obj"),
-            (Tokens.COLON, ":"),
-            (Tokens.OPBRACE, "{"),
-            (Tokens.STRING, "inner"),
-            (Tokens.COLON, ":"),
-            (Tokens.STRING, "obj"),
-            (Tokens.CLBRACE, "}"),
-            (Tokens.COMMA, ","),
-            (Tokens.STRING, "arr"),
-            (Tokens.COLON, ":"),
-            (Tokens.OPBRACKET, "["),
-            (Tokens.STRING, "first"),
-            (Tokens.COMMA, ","),
-            (Tokens.NUMBER, "12"),
-            (Tokens.COMMA, ","),
-            (Tokens.TRUE, "true"),
-            (Tokens.CLBRACKET, "]"),
-            (Tokens.CLBRACE, "}"),
-            (Tokens.EOF, ""),
+            (Kind.OP_BRACE, "{"),
+            (Kind.STRING, "hello"),
+            (Kind.COLON, ":"),
+            (Kind.STRING, "world"),
+            (Kind.COMMA, ","),
+            (Kind.STRING, "foo"),
+            (Kind.COLON, ":"),
+            (Kind.OP_BRACKET, "["),
+            (Kind.STRING, "bar"),
+            (Kind.COMMA, ","),
+            (Kind.NUMBER, "12.53"),
+            (Kind.COMMA, ","),
+            (Kind.TRUE, "true"),
+            (Kind.COMMA, ","),
+            (Kind.FALSE, "false"),
+            (Kind.COMMA, ","),
+            (Kind.STRING, "esc\"ape"),
+            (Kind.CL_BRACKET, "]"),
+            (Kind.CL_BRACE, "}"),
         ]
 
-        lex = Lexer(json)
+        source = '{"hello": "world","foo":["bar", 12.53, true, false, "esc\\"ape"]}'
+        lexer = Lexer(source)
 
-        for expected_type, expected_literal in tokens:
-            tok = lex.nextToken()
+        for kind, literal in tokens:
+            token = lexer.next_token()
 
-            self.assertEqual(expected_type, tok.type)
-            self.assertEqual(expected_literal, tok.literal)
+            self.assertEqual(kind, token.kind)
+            self.assertEqual(literal, token.literal)

@@ -1,105 +1,75 @@
-from src.tokens import Tokens, Token, lookup_ident
+from pyjsn.token import Kind, Token
 
 
 class Lexer:
-    tokens = {
-        "{": Token(Tokens.OPBRACE, "{"),
-        "}": Token(Tokens.CLBRACE, "}"),
-        "[": Token(Tokens.OPBRACKET, "["),
-        "]": Token(Tokens.CLBRACKET, "]"),
-        ":": Token(Tokens.COLON, ":"),
-        ",": Token(Tokens.COMMA, ","),
-    }
-
-    def __init__(self, input):
-        self.input = input
-        self.pos = 0
-        self.next_pos = 0
+    def __init__(self, source: str):
+        self.source = source
+        self.len = len(source)
+        self.cur = 0
         self.ch = None
 
-        self.__read_char()
+    def read_char(self) -> str:
+        if self.cur >= self.len:
+            return ""
 
-    def __read_char(self):
-        if self.next_pos >= len(self.input):
-            self.ch = None
-            return
+        self.ch = self.source[self.cur]
+        self.cur += 1
+        return self.ch
 
-        self.pos = self.next_pos
-        self.ch = self.input[self.pos]
-        self.next_pos += 1
+    def seek_char(self) -> str:
+        if self.cur >= self.len:
+            return ""
 
-    def __is_text(self, ch):
-        return ch != '"' and ch != "\n"
+        return self.source[self.cur]
 
-    def __is_ident(self, ch):
-        return ch in "abcdefghijklmniopqrstuvwxyz"
+    def eat_space(self) -> None:
+        while self.seek_char().isspace():
+            self.read_char()
 
-    def __is_digit(self, ch):
-        return ch in "0123456789."
+    def read_ident(self) -> str:
+        start = self.cur
+        while self.seek_char().isalpha():
+            self.read_char()
+        end = self.cur
+        return self.source[start-1:end]
 
-    def __get_text(self):
-        self.__read_char()
-        pos = self.pos
-
-        while self.__is_text(self.ch):
-            self.__read_char()
-
-        text = self.input[pos : self.pos]
-        self.__read_char()
-
+    def read_string(self) -> str:
+        text = ""
+        while (ch := self.read_char()) != "\"":
+            if ch == "\\":
+                self.read_char()
+            text += self.ch
         return text
 
-    def __get_ident(self):
-        pos = self.pos
+    def read_number(self) -> float:
+        start = self.cur
+        dot = False
+        while (ch := self.seek_char()).isnumeric() or ch == ".":
+            if ch == ".":
+                if dot:
+                    break
+                dot = True
+            self.read_char()
+        end = self.cur
+        return self.source[start-1:end]
 
-        while self.__is_ident(self.ch):
-            self.__read_char()
+    def next_token(self) -> Token:
+        self.eat_space()
 
-        ident = self.input[pos : self.pos]
+        match ch := self.read_char():
+            case "{": return Token(Kind.OP_BRACE, ch)
+            case "}": return Token(Kind.CL_BRACE, ch)
+            case "[": return Token(Kind.OP_BRACKET, ch)
+            case "]": return Token(Kind.CL_BRACKET, ch)
+            case ":": return Token(Kind.COLON, ch)
+            case ",": return Token(Kind.COMMA, ch)
+            case "\"": return Token(Kind.STRING, self.read_string())
+            case "": return Token(Kind.EOF, ch)
+            case _:
+                if ch.isnumeric():
+                    return Token(Kind.NUMBER, self.read_number())
 
-        return ident
+                if ch.isalpha():
+                    return Token.from_ident(self.read_ident())
 
-    def __get_digit(self):
-        pos = self.pos
-
-        while self.__is_digit(self.ch):
-            self.__read_char()
-
-        digit = self.input[pos : self.pos]
-
-        return digit
-
-    def __eat_whitespace(self):
-        while self.ch in [" ", "\n", "\t", "\r"]:
-            self.__read_char()
-
-    def next_token(self):
-        self.__eat_whitespace()
-
-        ch = self.ch
-
-        if ch is None:
-            tok = Token(Tokens.EOF, "")
-
-        elif ch in Lexer.tokens:
-            tok = Lexer.tokens[ch]
-
-        elif ch == '"':
-            tok = Token(Tokens.STRING, self.__get_text())
-            return tok
-
-        elif self.__is_digit(self.ch):
-            tok = Token(Tokens.NUMBER, self.__get_digit())
-            return tok
-
-        elif self.__is_ident(self.ch):
-            ident = self.__get_ident()
-
-            tok = Token(lookup_ident(ident), ident)
-            return tok
-
-        else:
-            tok = Token(Tokens.INVALID, None)
-
-        self.__read_char()
-        return tok
+                return Token(Kind.UNKNOWN, ch)
