@@ -9,15 +9,11 @@ This is to help me learn more about the tokenization and parsing processes. So, 
 ## 🛝 Example
 
 ```py
-import src.lexer import Lexer
-import src.parser import Parser
+import src.json import parse
 
 json = '{"foo": "bar", "bool": false}'
 
-lex = Lexer(json)
-parser = Parser(lex)
-
-data = parser.parse()
+data = parse(json)
 
 print(data)
 
